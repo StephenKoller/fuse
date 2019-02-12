@@ -1,25 +1,27 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 
+import Track from './Track.jsx';
+
 const FuseContainer = styled.div`
-  height: 120px;
+  height: 50px;
+  border: 1px solid black;
+  border-radius: 5px;
+  width: 50vw;
+  margin: 30px auto;
 `;
 
-const PlayButton = () => <button>Play</button>;
-
 export default class Fuse extends Component {
-  componentDidMount() {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const audioCtx = new AudioContext();
-    const audioElement = document.querySelector('audio');
-    const track = audioCtx.createMediaElementSource(audioElement);
+  constructor(props) {
+    super(props);
+
+    this.fuseRef = React.createRef();
   }
 
   render() {
     return (
-      <FuseContainer>
-        <audio />
-        <PlayButton />
+      <FuseContainer ref={this.fuseRef}>
+        <Track parentRef={this.fuseRef} />
       </FuseContainer>
     );
   }
