@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 const TrackContainer = styled.div`
   background-color: rgba(0,0,0,0.5);
-  width: 50px;
+  width: 150px;
   height: 100%;
   position: relative;
   display: flex;
@@ -22,60 +22,58 @@ export default class Track extends Component {
       parentRef: this.props.parentRef,
       parentRect: {},
       rect: {},
+      isDragging: false,
     }
 
     this.trackRef = React.createRef();
   }
 
-  componentDidMount() {
-    // create an empty <span>
-    this.dragImgEl = document.createElement('span');
-
-    // set its style so it'll be effectively (but not technically) invisible and
-    // won't change document flow
-    this.dragImgEl.setAttribute('style',
-      'position: absolute; display: block; top: 0; left: 0; width: 0; height: 0;' );
-
-    // add it to the document
-    document.body.appendChild(this.dragImgEl);
+  dragStartHandler = event => {
+    console.log('drag start');
+    this.setState({isDragging: true});
   }
     
-  dragHandler = (event) => {
-    event.dataTransfer.setDragImage(this.dragImgEl, 0, 0);
-
-    const calculatedPosition = event.pageX - this.state.xOffset;
-    const trackWidth = this.state.parentRect.width - this.state.rect.width;
-
-    let newPosition = calculatedPosition;
-    if (calculatedPosition > trackWidth) newPosition = trackWidth;
-    if (calculatedPosition < 0) newPosition = 0;
-
+  dragHandler = event => {
+    if(!this.state.isDragging) return;
 
     this.setState({
       parentRect: this.state.parentRef.current.getBoundingClientRect(),
       xOffset: this.state.parentRef.current.getBoundingClientRect().left,
       rect: this.trackRef.current.getBoundingClientRect(),
-      xPosition: newPosition,
     });
 
-    // if (calculatedPosition < 0) {
+    this.updatePosition(event);
+  }
 
-    // }
+  updatePosition = (event) => {
+    const calculatedPosition = event.pageX - this.state.xOffset;
+    const sliderWidth = this.state.parentRect.width - this.state.rect.width;
 
-    // if (calculatedPosition > )
-    // this.setState({xPosition: position > 0 ? position : 0});
+    let newPosition = calculatedPosition;
+    if (calculatedPosition > sliderWidth) newPosition = sliderWidth;
+    if (calculatedPosition < 0) newPosition = 0;
+    this.setState({xPosition: newPosition});
+  }
+
+  dragEndHandler = event => {
+    console.log('drag end');
+    this.setState({isDragging: false});
   }
 
   render() {
     return (
-      <TrackContainer 
-        draggable
-        onDragStart={this.dragStartHandler}
-        onDrag={this.dragHandler}
-        onDragEnd={this.dragHandler}
-        style={{left: this.state.xPosition}}
-        ref={this.trackRef}>
-      </TrackContainer>
+      <>
+        <TrackContainer 
+          onPointerDown={this.dragStartHandler}
+          onPointerMove={this.dragHandler}
+          onPointerUp={this.dragEndHandler}
+          onPointerOut={this.dragEndHandler}
+          style={{left: this.state.xPosition}}
+          ref={this.trackRef}>
+        </TrackContainer>
+        <div>xOffset: {this.state.xOffset}</div>
+        <div>xPosition: {this.state.xPosition}</div>
+      </>
     )
   }
 }
